@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSI 300 Return Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --text-primary: #f0f0f5;
+            --text-secondary: #8a8a9a;
+            --text-muted: #5a5a6a;
+            --accent-green: #00d4aa;
+            --accent-red: #ff4757;
+            --accent-gold: #ffd93d;
+            --accent-blue: #5b8def;
+            --border-color: #2a2a3a;
+            --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-gold) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        .data-info {
+            display: inline-block;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 16px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .calculator-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: var(--card-shadow);
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.15);
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #3d6bcc 100%);
+            border: none;
+            border-radius: 8px;
+            padding: 16px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(91, 141, 239, 0.3);
+        }
+
+        .calculate-btn:active {
+            transform: translateY(0);
+        }
+
+        .results-section {
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border-color);
+            display: none;
+        }
+
+        .results-section.visible {
+            display: block;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .result-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .result-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+        }
+
+        .result-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .result-value.positive {
+            color: var(--accent-green);
+        }
+
+        .result-value.negative {
+            color: var(--accent-red);
+        }
+
+        .result-value.neutral {
+            color: var(--text-primary);
+        }
+
+        .summary-box {
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .summary-title {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .summary-value.positive {
+            color: var(--accent-green);
+        }
+
+        .summary-value.negative {
+            color: var(--accent-red);
+        }
+
+        .error-message {
+            background: rgba(255, 71, 87, 0.1);
+            border: 1px solid var(--accent-red);
+            border-radius: 8px;
+            padding: 16px;
+            color: var(--accent-red);
+            margin-top: 16px;
+            display: none;
+        }
+
+        .error-message.visible {
+            display: block;
+        }
+
+        .daily-table {
+            margin-top: 32px;
+            overflow-x: auto;
+        }
+
+        .daily-table h3 {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        tr:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-info {
+            padding: 8px 16px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px 16px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .calculator-card {
+                padding: 20px;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .result-value, .summary-value {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CSI 300 Return Calculator</h1>
+            <p class="subtitle">Calculate compounded returns on China's flagship index</p>
+            <div class="data-info" id="dataRange">Loading data...</div>
+        </header>
+
+        <div class="calculator-card">
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Initial Capital (CNY)</label>
+                    <input type="number" id="initialCapital" value="10000" min="0" step="100">
+                </div>
+                <div class="input-group">
+                    <label>Start Date</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="input-group">
+                    <label>End Date</label>
+                    <input type="date" id="endDate">
+                </div>
+            </div>
+            <button class="calculate-btn" onclick="calculateReturns()">Calculate Returns</button>
+            <div class="error-message" id="errorMessage"></div>
+
+            <div class="results-section" id="resultsSection">
+                <div class="results-grid">
+                    <div class="result-card">
+                        <div class="result-label">Start Price</div>
+                        <div class="result-value neutral" id="startPrice">-</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">End Price</div>
+                        <div class="result-value neutral" id="endPrice">-</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Trading Days</div>
+                        <div class="result-value neutral" id="tradingDays">-</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Total Return</div>
+                        <div class="result-value" id="totalReturn">-</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="result-label">Annualized Return</div>
+                        <div class="result-value" id="annualizedReturn">-</div>
+                    </div>
+                </div>
+                <div class="summary-box">
+                    <div class="summary-title">Final Portfolio Value</div>
+                    <div class="summary-value" id="finalValue">-</div>
+                </div>
+                <div class="daily-table">
+                    <h3>Historical Data (Sample)</h3>
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Open</th>
+                                <th>High</th>
+                                <th>Low</th>
+                                <th>Close</th>
+                                <th>Change %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                    <div class="pagination" id="pagination"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Data provided by Yahoo Finance • CSI 300 Index (000300.SS)
+        </footer>
+    </div>
+
+    <script src="csi300-data.js"></script>
+    <script>
+        let currentPage = 1;
+        const rowsPerPage = 50;
+
+        // Initialize dates
+        const dataInfo = document.getElementById('dataRange');
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+
+        if (typeof csi300Data !== 'undefined' && csi300Data.length > 0) {
+            const firstDate = csi300Data[0].date;
+            const lastDate = csi300Data[csi300Data.length - 1].date;
+            dataInfo.textContent = `Data: ${firstDate} to ${lastDate} (${csi300Data.length} trading days)`;
+            
+            // Set default date range (last year)
+            const today = new Date(lastDate);
+            const oneYearAgo = new Date(today);
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+            
+            startDateInput.value = oneYearAgo.toISOString().split('T')[0];
+            endDateInput.value = lastDate;
+            
+            startDateInput.min = firstDate;
+            startDateInput.max = lastDate;
+            endDateInput.min = firstDate;
+            endDateInput.max = lastDate;
+        }
+
+        function calculateReturns() {
+            const errorDiv = document.getElementById('errorMessage');
+            const resultsDiv = document.getElementById('resultsSection');
+            const initialCapital = parseFloat(document.getElementById('initialCapital').value);
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            // Reset
+            errorDiv.classList.remove('visible');
+            resultsDiv.classList.remove('visible');
+
+            // Validation
+            if (!initialCapital || initialCapital <= 0) {
+                showError('Please enter a valid initial capital amount');
+                return;
+            }
+            if (!startDate || !endDate) {
+                showError('Please select both start and end dates');
+                return;
+            }
+            if (startDate > endDate) {
+                showError('Start date must be before end date');
+                return;
+            }
+
+            // Filter data
+            const filteredData = csi300Data.filter(d => d.date >= startDate && d.date <= endDate);
+
+            if (filteredData.length === 0) {
+                showError('No data available for the selected date range');
+                return;
+            }
+
+            const startPrice = filteredData[0].close;
+            const endPrice = filteredData[filteredData.length - 1].close;
+            const tradingDays = filteredData.length;
+
+            // Calculate returns
+            const totalReturn = ((endPrice - startPrice) / startPrice) * 100;
+            const finalValue = initialCapital * (1 + totalReturn / 100);
+
+            // Calculate annualized return
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const years = (end - start) / (365.25 * 24 * 60 * 60 * 1000);
+            let annualizedReturn = 0;
+            if (years > 0) {
+                annualizedReturn = (Math.pow(endPrice / startPrice, 1 / years) - 1) * 100;
+            }
+
+            // Display results
+            document.getElementById('startPrice').textContent = startPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('endPrice').textContent = endPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('tradingDays').textContent = tradingDays;
+
+            const totalReturnEl = document.getElementById('totalReturn');
+            totalReturnEl.textContent = (totalReturn >= 0 ? '+' : '') + totalReturn.toFixed(2) + '%';
+            totalReturnEl.className = 'result-value ' + (totalReturn >= 0 ? 'positive' : 'negative');
+
+            const annualizedReturnEl = document.getElementById('annualizedReturn');
+            if (years > 0) {
+                annualizedReturnEl.textContent = (annualizedReturn >= 0 ? '+' : '') + annualizedReturn.toFixed(2) + '%';
+            } else {
+                annualizedReturnEl.textContent = 'N/A';
+            }
+            annualizedReturnEl.className = 'result-value ' + (annualizedReturn >= 0 ? 'positive' : 'negative');
+
+            const finalValueEl = document.getElementById('finalValue');
+            finalValueEl.textContent = '¥' + finalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            finalValueEl.className = 'summary-value ' + (finalValue >= initialCapital ? 'positive' : 'negative');
+
+            // Show table
+            currentPage = 1;
+            renderTable(filteredData);
+
+            // Show results
+            resultsDiv.classList.add('visible');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('visible');
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            // Calculate daily changes
+            const dataWithChanges = data.map((d, i) => {
+                let change = 0;
+                if (i > 0) {
+                    change = ((d.close - data[i-1].close) / data[i-1].close) * 100;
+                }
+                return { ...d, change };
+            }).reverse(); // Most recent first
+
+            const totalPages = Math.ceil(dataWithChanges.length / rowsPerPage);
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const pageData = dataWithChanges.slice(start, end);
+
+            pageData.forEach(d => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${d.date}</td>
+                    <td>${d.open.toFixed(2)}</td>
+                    <td>${d.high.toFixed(2)}</td>
+                    <td>${d.low.toFixed(2)}</td>
+                    <td>${d.close.toFixed(2)}</td>
+                    <td style="color: ${d.change >= 0 ? 'var(--accent-green)' : 'var(--accent-red)'}">${d.change >= 0 ? '+' : ''}${d.change.toFixed(2)}%</td>
+                `;
+                tbody.appendChild(row);
+            });
+
+            // Render pagination
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = `
+                <button onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>← Prev</button>
+                <span class="page-info">Page ${currentPage} of ${totalPages}</span>
+                <button onclick="changePage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>Next →</button>
+            `;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(csi300Data.length / rowsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const filteredData = csi300Data.filter(d => d.date >= startDate && d.date <= endDate);
+            renderTable(filteredData);
+        }
+    </script>
+</body>
+</html>
